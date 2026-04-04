@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Dark overlay for better contrast -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#40000000"/>
+
+    <!-- Face detection overlay (dynamic green box) -->
+    <com.example.facercognitionapp.camera.FaceOverlayView
+        android:id="@+id/faceOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"
+        android:importantForAccessibility="no" />
+
+    <!-- Static face guide (oval) -->
+    <View
+        android:id="@+id/faceGuide"
+        android:layout_width="346dp"
+        android:layout_height="392dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="-40dp" />
+
+    <!-- Top instruction card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal"
+            android:background="#CC1A1D24"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:gravity="center">
+
+            <!-- Blue dot indicator -->
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="#4A90E2"
+                android:layout_marginEnd="12dp"/>
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Align your face in the frame"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:letterSpacing="0.01"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom instruction hints -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#CC1A1D24"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tips for best results"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Keep face centered • Good lighting • Remove glasses"
+                android:textColor="#A0A0A0"
+                android:textSize="11sp"
+                android:gravity="center"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Welcome card -->
+    <!-- Welcome card (BOTTOM SHEET - WARM TRUST STYLE) -->
+    <LinearLayout
+        android:id="@+id/welcomeCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:background="#F9FAFB"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:gravity="center">
+
+        <!-- Accent divider -->
+        <View
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:background="#F7931E"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Success icon -->
+
+
+        <TextView
+            android:id="@+id/welcomeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome Back!"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1F2937"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Identity verified successfully"
+            android:textSize="14sp"
+            android:textColor="#6B7280"
+            android:layout_marginTop="6dp"/>
+
+    </LinearLayout>
+
+
+
+</FrameLayout>

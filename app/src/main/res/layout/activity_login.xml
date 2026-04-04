@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1A1D24"
+    android:fitsSystemWindows="true">
+
+    <!-- Header Section with Logo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#BDCEE9"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="60dp"
+        android:paddingBottom="40dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="Scriptindia"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo" />
+
+    </LinearLayout>
+
+    <!-- Login Form Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="top"
+        android:paddingTop="48dp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Sign In"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="318dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="36dp"
+            android:text="Access your administrative dashboard"
+            android:textColor="#6B7280"
+            android:textSize="14sp" />
+
+        <!-- Email Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USERNAME"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#8B92A0"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#2A2E39"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeColor="#4A90E2"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="admin"
+                android:inputType="textEmailAddress"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#6B7280"
+                android:textSize="15sp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PASSWORD"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#8B92A0"
+            android:letterSpacing="0.05"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#2A2E39"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeColor="#4A90E2"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#8B92A0"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="*************"
+                android:inputType="textPassword"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#6B7280"
+                android:textSize="15sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Forgot Password -->
+
+        <!-- Login Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/loginBtn"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="32dp"
+            android:text="Sign In"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
+            android:letterSpacing="0.05"
+            app:backgroundTint="#4A90E2"
+            app:cornerRadius="8dp"
+            app:elevation="0dp" />
+
+    </LinearLayout>
+
+    <!-- Footer -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingBottom="32dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Developed By ScriptIndia"
+            android:textSize="11sp"
+            android:textColor="#6B7280"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
+
+</LinearLayout>
