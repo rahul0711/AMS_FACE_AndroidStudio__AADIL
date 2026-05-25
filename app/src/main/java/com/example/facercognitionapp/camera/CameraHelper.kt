@@ -13,6 +13,11 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import java.io.File
 import java.util.concurrent.Executors
 
+/**
+ * Camera capture + face detection logic only.
+ * UI shell (sidebar + universal header) lives in [com.example.facercognitionapp.MainActivity]
+ * via [com.example.facercognitionapp.ui.core.BaseDrawerContentActivity].
+ */
 class CameraHelper(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
@@ -24,6 +29,8 @@ class CameraHelper(
     private lateinit var imageCapture: ImageCapture
 
     private var isCapturing = false
+    /** Blocks new photos while Recognize API call is in progress. */
+    private var apiLocked = false
 
     private var cameraStartTime = 0L
     private val warmupMs = 500L
@@ -132,8 +139,8 @@ class CameraHelper(
                     return@addOnSuccessListener
                 }
 
-                // ✅ ONLY capture if not already capturing
-                if (!isCapturing) {
+                // Only capture when not busy and API is not in flight
+                if (!isCapturing && !apiLocked) {
                     isCapturing = true
                     capture()
                 }
@@ -179,9 +186,20 @@ class CameraHelper(
 
     // ================= CONTROL =================
 
-    // 🔥 Called from MainActivity after API completes
-    fun resetCapture() {
+    /** Call before starting Recognize API — prevents duplicate captures. */
+    fun lockForApi() {
+        apiLocked = true
+    }
+
+    /** Call after Recognize API completes (success or failure). */
+    fun unlockAfterApi() {
+        apiLocked = false
         isCapturing = false
+    }
+
+    @Deprecated("Use unlockAfterApi()", ReplaceWith("unlockAfterApi()"))
+    fun resetCapture() {
+        unlockAfterApi()
     }
 
     // ================= CLEANUP =================

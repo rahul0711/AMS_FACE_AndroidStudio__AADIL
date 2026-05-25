@@ -11,10 +11,11 @@ import javax.net.ssl.*
 
 object ApiClient {
 
-    private const val BASE_URL = "https://demo.scriptindia.in:8152/"
+    private const val BASE_URL = "https://demo.scriptindia.in:8132/"
 
     private val logging = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BASIC
+        // Use BODY while debugging face-match responses; set back to BASIC for production.
+        level = HttpLoggingInterceptor.Level.BODY
     }
 
     private val unsafeClient: OkHttpClient by lazy {

@@ -1,73 +1,93 @@
 package com.example.facercognitionapp
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.ExperimentalGetImage
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.facercognitionapp.camera.CameraHelper
-import com.example.facercognitionapp.databinding.ActivityMainBinding
+import com.example.facercognitionapp.databinding.ContentMainCameraBinding
+import com.example.facercognitionapp.model.RecognizeResponse
 import com.example.facercognitionapp.network.ApiClient
+import com.example.facercognitionapp.ui.core.BaseDrawerContentActivity
+import com.example.facercognitionapp.util.LocationHelper
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import android.speech.tts.TextToSpeech
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.util.Locale
-import android.os.Handler
-import android.os.Looper
-import android.content.Intent
 
 @ExperimentalGetImage
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseDrawerContentActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var contentBinding: ContentMainCameraBinding
     private lateinit var cameraHelper: CameraHelper
     private lateinit var tts: TextToSpeech
 
-    // ✅ STEP 3: receive punch type
-    private var punchType: String = ""
+    private var inOutFlag: Int = 1
+    private var punchType: String = "IN"
+    private var apiInFlight = false
 
     private val cameraPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) startCamera()
+            if (granted) checkLocationAndStartCamera()
             else showStatus("Camera permission denied")
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private val locationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+            val ok = grants.values.any { it }
+            if (ok) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    startCamera()
+                }
+            } else {
+                Toast.makeText(this, "Location permission required for punch", Toast.LENGTH_SHORT).show()
+            }
+        }
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun contentLayoutRes() = R.layout.content_main_camera
 
-        // ✅ GET DATA FROM PunchActivity
-        punchType = intent.getStringExtra("PUNCH_TYPE") ?: ""
+    override fun screenTitleRes() = R.string.title_face_scan
 
-        // (Optional debug)
-        showStatus("Mode: $punchType")
+    override fun drawerMenuItemId() = R.id.nav_dashboard
 
-        // ✅ TTS setup
+    override fun onContentInflated(savedInstanceState: Bundle?) {
+        contentBinding = ContentMainCameraBinding.bind(shellBinding.contentContainer.getChildAt(0))
+
+        inOutFlag = intent.getIntExtra(EXTRA_IN_OUT_FLAG, 1)
+        punchType = intent.getStringExtra(EXTRA_PUNCH_TYPE) ?: if (inOutFlag == 2) "OUT" else "IN"
+
+        headerController.setTitle(
+            if (inOutFlag == 2) getString(R.string.title_punch_out) else getString(R.string.title_punch_in)
+        )
+
         tts = TextToSpeech(this) {
             if (it == TextToSpeech.SUCCESS) {
                 tts.language = Locale.US
             }
         }
 
-        // ✅ Camera Helper
         cameraHelper = CameraHelper(
             context = this,
             lifecycleOwner = this,
-
             onFaceDetected = { imageFile ->
-                showStatus("Recognizing... ($punchType)")
+                showStatus("Recognizing...")
                 sendToBackend(imageFile)
             },
-
             onNoFace = {
                 showStatus("No face detected")
             }
@@ -77,143 +97,214 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
         ) {
-            startCamera()
+            checkLocationAndStartCamera()
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
-    private fun startCamera() {
-        cameraHelper.startCamera(binding.previewView)
-        showStatus("No face detected ($punchType)")
+    private fun checkLocationAndStartCamera() {
+        val hasLocation = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasLocation) {
+            startCamera()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
     }
 
-    // ================= API =================
+    private fun startCamera() {
+        cameraHelper.startCamera(contentBinding.previewView)
+        showStatus("Align your face — ${if (inOutFlag == 1) "Punch IN" else "Punch OUT"}")
+    }
 
     private fun sendToBackend(imageFile: File) {
+        if (apiInFlight) return
+
+        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+        val companyId = prefs.getInt("company_id", 0)
+        val employeeId = prefs.getInt("employee_id", 0)
+        val employeeCardNo = prefs.getString("employee_card_no", "") ?: ""
+
+        if (companyId == 0 || employeeId == 0 || employeeCardNo.isBlank()) {
+            showStatus("Login data missing. Please login again.")
+            cameraHelper.unlockAfterApi()
+            return
+        }
+
+        apiInFlight = true
+        cameraHelper.lockForApi()
 
         lifecycleScope.launch {
-
             try {
-
-                val requestBody =
-                    imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
-
-                val part = MultipartBody.Part.createFormData(
-                    "file",
-                    imageFile.name,
-                    requestBody
-                )
-
-                // 🔥 NEXT STEP: we will add punchType here later
-                val response = ApiClient.api.scanFace(part)
-
-                if (response.isSuccessful) {
-
-                    val data = response.body()
-
-                    if (data != null) {
-
-                        val score = data.score ?: 0.0
-                        val threshold = data.threshold ?: 0.6
-
-                        if (data.match == true && score >= threshold){
-
-                            val name = data.name ?: "User"
-                            val status = data.attendance?.status ?: ""
-                            val punch = data.attendance?.punch_type ?: ""
-
-                            val timeRaw = data.attendance?.punch_time
-                            val time = timeRaw?.substring(11, 16) ?: ""
-
-                            val message = "$name\n$punch - $status\n$time"
-
-                            showWelcome(message, name, status)
-
-                            // ✅ SEND RESULT BACK TO PunchActivity
-                            val resultIntent = Intent()
-                            resultIntent.putExtra("PUNCH_TYPE", punchType)
-                            resultIntent.putExtra("PUNCH_TIME", timeRaw ?: "")
-
-                            setResult(RESULT_OK, resultIntent)
-
-                            // 🔥 CLOSE CAMERA SCREEN AFTER SUCCESS
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                finish()
-                            }, 1200)
-                        } else {
-                            handleUnknownFace(data.message)
-                        }
-
-                    } else {
-                        showStatus("Empty response")
-                    }
-
-                } else {
-                    showStatus("Server error ${response.code()}")
+                val location = LocationHelper.getCurrentLocation(this@MainActivity)
+                if (location == null) {
+                    showStatus("Unable to get location. Enable GPS.")
+                    return@launch
                 }
 
+                val latitude = location.latitude.toString()
+                val longitude = location.longitude.toString()
+
+                if (!imageFile.exists() || imageFile.length() < 512L) {
+                    showStatus("Photo file is empty or too small. Try again.")
+                    return@launch
+                }
+
+                Log.i(
+                    TAG,
+                    """
+                    |>>> POST /Recognize REQUEST
+                    |    InOutFlag=$inOutFlag punchType=$punchType
+                    |    CompanyId=$companyId EmployeeId=$employeeId EmployeeCardNo=$employeeCardNo
+                    |    Latitude=$latitude Longitude=$longitude
+                    |    file.name=${imageFile.name} file.bytes=${imageFile.length()} path=${imageFile.absolutePath}
+                    """.trimMargin()
+                )
+
+                val fileBody = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                val filePart = MultipartBody.Part.createFormData("file", imageFile.name, fileBody)
+
+                val textType = "text/plain".toMediaTypeOrNull()
+
+                val response = ApiClient.api.recognize(
+                    file = filePart,
+                    inOutFlag = inOutFlag.toString().toRequestBody(textType),
+                    latitude = latitude.toRequestBody(textType),
+                    longitude = longitude.toRequestBody(textType),
+                    companyId = companyId.toString().toRequestBody(textType),
+                    employeeId = employeeId.toString().toRequestBody(textType),
+                    employeeCardNo = employeeCardNo.toRequestBody(textType)
+                )
+
+                val rawJson = response.body()?.string()
+                    ?: response.errorBody()?.string()
+
+                val parsed = RecognizeResponse.fromJson(rawJson)
+                val displayText = parsed?.primaryDisplayText()?.takeIf { it.isNotBlank() }
+                    ?: rawJson?.trim()?.takeIf { it.isNotBlank() }
+                    ?: "(empty body)"
+                val punchSuccess = parsed?.isPunchSuccess() == true
+                val punchFailure = parsed?.isPunchFailure() == true
+
+                Log.i(
+                    TAG,
+                    """
+                    |>>> POST /Recognize RESPONSE
+                    |    HTTP ${response.code()} isSuccessful=${response.isSuccessful}
+                    |    rawBody=$rawJson
+                    |    parsed match=${parsed?.match} score=${parsed?.score} threshold=${parsed?.threshold}
+                    |    displayMessage=$displayText
+                    |    punchSuccess=$punchSuccess punchFailure=$punchFailure
+                    """.trimMargin()
+                )
+
+                if (!response.isSuccessful) {
+                    showServerResponse(displayText, success = false)
+                    resetCameraStatus()
+                    return@launch
+                }
+
+                showServerResponse(displayText, success = punchSuccess)
+
+                if (!punchSuccess) {
+                    resetCameraStatus()
+                    return@launch
+                }
+
+                if (callingActivity != null) {
+                    val punchTime = parsed?.resolvedPunchTime
+                        ?: java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+                            .format(java.util.Date())
+                    savePunchTime(punchType, punchTime)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        setResult(
+                            RESULT_OK,
+                            Intent().apply {
+                                putExtra(EXTRA_PUNCH_TYPE, punchType)
+                                putExtra(EXTRA_PUNCH_TIME, punchTime)
+                            }
+                        )
+                        finish()
+                    }, 2200)
+                }
             } catch (e: Exception) {
-                showStatus("Network error")
+                Log.e(TAG, "Recognize request failed", e)
+                showStatus("Network error: ${e.localizedMessage}")
+            } finally {
+                apiInFlight = false
+                cameraHelper.unlockAfterApi()
             }
-
-            cameraHelper.resetCapture()
         }
     }
 
-    // ================= UI =================
-
-    private fun showWelcome(message: String, name: String, status: String) {
-        runOnUiThread {
-
-            binding.welcomeText.text = message
-            binding.welcomeCard.visibility = View.VISIBLE
-
-            if (status.contains("Late", true)) {
-                binding.welcomeCard.setBackgroundColor(0xFFFFCDD2.toInt())
-            } else {
-                binding.welcomeCard.setBackgroundColor(0xFFC8E6C9.toInt())
-            }
-
-            tts.speak("$name $status", TextToSpeech.QUEUE_FLUSH, null, null)
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                binding.welcomeCard.visibility = View.GONE
-            }, 1200)
+    private fun savePunchTime(type: String, time: String) {
+        val prefs = getSharedPreferences("auth", MODE_PRIVATE).edit()
+        when (type) {
+            "IN" -> prefs.putString(PunchActivity.PREF_LAST_IN_TIME, time)
+            "OUT" -> prefs.putString(PunchActivity.PREF_LAST_OUT_TIME, time)
         }
+        prefs.apply()
     }
 
-    private fun handleUnknownFace(apiMessage: String?) {
+    private fun resetCameraStatus() {
+        showStatus("Align your face — ${if (inOutFlag == 1) "Punch IN" else "Punch OUT"}")
+    }
+
+    /** Shows the backend `message` text only — no client-side success copy. */
+    private fun showServerResponse(message: String, success: Boolean) {
         runOnUiThread {
+            contentBinding.welcomeText.text = message
+            contentBinding.welcomeSubtext.visibility = if (success) View.VISIBLE else View.GONE
+            contentBinding.welcomeCard.visibility = View.VISIBLE
+            contentBinding.welcomeCard.setBackgroundColor(
+                if (success) 0xFFC8E6C9.toInt() else 0xFFFFF9C4.toInt()
+            )
+            tts.speak(message.lines().firstOrNull()?.take(120) ?: message, TextToSpeech.QUEUE_FLUSH, null, null)
 
-            val message = apiMessage ?: "Face not recognized"
-
-            binding.welcomeText.text = message
-            binding.welcomeCard.visibility = View.VISIBLE
-            binding.welcomeCard.setBackgroundColor(0xFFFFF9C4.toInt())
-
-            tts.speak("Face not recognized", TextToSpeech.QUEUE_FLUSH, null, null)
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                binding.welcomeCard.visibility = View.GONE
-            }, 1000)
+            if (!success) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    contentBinding.welcomeCard.visibility = View.GONE
+                }, 3500)
+            }
         }
     }
 
     private fun showStatus(text: String) {
         runOnUiThread {
-            binding.statusText.text = text
+            contentBinding.statusText.text = text
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        tts.shutdown()
-        cameraHelper.stopCamera()
+        if (::tts.isInitialized) {
+            tts.shutdown()
+        }
+        if (::cameraHelper.isInitialized) {
+            cameraHelper.stopCamera()
+        }
+    }
+
+    companion object {
+        private const val TAG = "RecognizeAPI"
+        const val EXTRA_IN_OUT_FLAG = "IN_OUT_FLAG"
+        const val EXTRA_PUNCH_TYPE = "PUNCH_TYPE"
+        const val EXTRA_PUNCH_TIME = "PUNCH_TIME"
     }
 }

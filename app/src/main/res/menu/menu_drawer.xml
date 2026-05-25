@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/nav_group_main"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_nav_dashboard"
+            android:title="@string/menu_dashboard" />
+        <item
+            android:id="@+id/nav_attendance_details"
+            android:icon="@drawable/ic_nav_attendance"
+            android:title="@string/menu_attendance_details" />
+        <item
+            android:id="@+id/nav_client_visit"
+            android:icon="@drawable/ic_nav_client_visit"
+            android:title="@string/menu_client_visit" />
+        <item
+            android:id="@+id/nav_my_visit"
+            android:icon="@drawable/ic_nav_my_visit"
+            android:title="@string/menu_my_visit" />
+        <item
+            android:id="@+id/nav_change_password"
+            android:icon="@drawable/ic_nav_password"
+            android:title="@string/menu_change_password" />
+    </group>
+
+</menu>

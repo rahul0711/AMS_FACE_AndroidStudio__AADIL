@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextAppearance.App.HeaderTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/app_text_primary</item>
+    </style>
+
+    <style name="Widget.App.NavigationView" parent="Widget.Material3.NavigationView">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="itemIconTint">@color/nav_item_color</item>
+        <item name="itemTextColor">@color/nav_item_color</item>
+        <item name="itemBackground">@drawable/bg_nav_item</item>
+        <item name="itemIconSize">22dp</item>
+        <item name="itemHorizontalPadding">20dp</item>
+        <item name="itemShapeAppearance">@style/Shape.App.NavItem</item>
+        <item name="itemShapeFillColor">@color/app_drawer_item_selected_bg</item>
+        <item name="itemShapeInsetStart">12dp</item>
+        <item name="itemShapeInsetEnd">12dp</item>
+        <item name="itemShapeInsetTop">2dp</item>
+        <item name="itemShapeInsetBottom">2dp</item>
+    </style>
+
+    <style name="Shape.App.NavItem" parent="ShapeAppearance.Material3.Corner.Small">
+        <item name="cornerSize">10dp</item>
+    </style>
+
+    <style name="Widget.App.DrawerLogout" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/app_logout</item>
+        <item name="strokeColor">@color/app_logout</item>
+        <item name="iconTint">@color/app_logout</item>
+        <item name="cornerRadius">10dp</item>
+    </style>
+
+</resources>

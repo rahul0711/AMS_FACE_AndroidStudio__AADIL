@@ -1,3 +1,154 @@
 <resources>
     <string name="app_name">Script Face AMS</string>
+
+    <!-- App footer (all screens) -->
+    <string name="app_footer_designed_by">Designed &amp; Developed by</string>
+    <string name="app_footer_script_india">Script India</string>
+
+    <!-- Login -->
+    <string name="login_brand_script">SCRIPT</string>
+    <string name="login_brand_ams"> AMS</string>
+    <string name="login_subtitle">Sign in to continue</string>
+    <string name="login_title_sign_in">SIGN IN</string>
+    <string name="login_app_title">Face Recognition Attendance System</string>
+    <string name="login_powered_by">Powered by</string>
+    <string name="login_secure_access">SECURE ACCESS</string>
+    <string name="login_sign_in_heading">Sign in to your account</string>
+    <string name="login_label_mobile">MOBILE NUMBER</string>
+    <string name="login_hint_mobile">Enter your MobileNumber</string>
+    <string name="login_hint_mobile_short">Mobile No.</string>
+    <string name="login_hint_password_short">Password.</string>
+    <string name="login_label_password">PASSWORD</string>
+    <string name="login_hint_password">Enter your password</string>
+    <string name="login_sign_in">Sign In</string>
+    <string name="login_please_wait">Please wait…</string>
+    <string name="login_error_empty">Please enter mobile number and password</string>
+    <string name="login_logo_content_description">Script India</string>
+
+    <!-- Navigation drawer -->
+    <string name="nav_open_drawer">Open navigation menu</string>
+    <string name="nav_close_drawer">Close navigation menu</string>
+    <string name="nav_header_subtitle">Attendance Management</string>
+
+    <!-- Screen titles (shown in universal header) -->
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_attendance_details">Attendance Details</string>
+    <string name="title_client_visit">Client Visit</string>
+    <string name="title_my_visit">My Visit</string>
+    <string name="title_change_password">Change Password</string>
+    <string name="title_profile">Profile</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_face_scan">Face Scan</string>
+    <string name="title_punch_in">Punch IN</string>
+    <string name="title_punch_out">Punch OUT</string>
+    <string name="title_select_company">Select Company</string>
+    <string name="title_punch">Punch</string>
+
+    <!-- Menu labels -->
+    <string name="menu_dashboard">Dashboard</string>
+    <string name="menu_attendance_details">Attendance Details</string>
+    <string name="menu_client_visit">Client Visit</string>
+    <string name="menu_my_visit">My Visit</string>
+    <string name="menu_change_password">Change Password</string>
+    <string name="menu_logout">Logout</string>
+    <string name="menu_profile">Profile</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_face_scan">Face Scan</string>
+    <string name="menu_select_company">Select Company</string>
+    <string name="menu_punch">Punch</string>
+
+    <string name="placeholder_coming_soon">This section will be available soon.</string>
+    <string name="hint_current_password">Current password</string>
+    <string name="hint_new_password">New password</string>
+    <string name="hint_confirm_password">Confirm new password</string>
+    <string name="action_update_password">Update password</string>
+    <string name="msg_password_updated">Password update will be connected to the API soon.</string>
+    <string name="change_password_fill_all">Please fill old, new and confirm password</string>
+    <string name="change_password_mismatch">New passwords do not match</string>
+    <string name="change_password_no_session">Please log in again before changing password</string>
+    <string name="change_password_success">Password changed successfully</string>
+    <string name="change_password_error_http">Could not change password (HTTP %1$d)</string>
+    <string name="change_password_error_generic">Could not change password. Try again.</string>
+    <string name="change_password_updating">Updating…</string>
+    <string name="msg_logout_success">Logged out successfully</string>
+    <string name="nav_header_guest">Employee</string>
+    <string name="not_punched_yet">Not punched yet</string>
+    <string name="punch_brand_script">SCRIPT </string>
+    <string name="punch_brand_ams">India</string>
+    <string name="punch_in_label">IN PUNCH:</string>
+    <string name="punch_out_label">OUT PUNCH:</string>
+    <string name="punch_in_with_time">IN PUNCH: %1$s</string>
+    <string name="punch_out_with_time">OUT PUNCH: %1$s</string>
+    <string name="punch_employee_format">%1$s(%2$s)</string>
+    <string name="punch_footer_credit">Developed and  Designed By :</string>
+    <string name="punch_footer_brand_name">Script India</string>
+    <string name="col_attendance_date">Date</string>
+    <string name="col_in_time">In</string>
+    <string name="col_out_time">Out</string>
+    <string name="col_status">Status</string>
+    <string name="attendance_summary_present">Present: %1$d</string>
+    <string name="attendance_summary_absent">Absent: %1$d</string>
+    <string name="attendance_error_no_employee">Employee not found. Please log in again.</string>
+    <string name="attendance_error_http">Could not load report (HTTP %1$d).</string>
+    <string name="attendance_error_generic">Could not load attendance.</string>
+    <string name="attendance_filter_month">Month</string>
+    <string name="attendance_filter_year">Year</string>
+    <string name="attendance_filter_auto_hint">Changing month or year loads the report. Scroll the year list for more years.</string>
+    <string name="attendance_parse_error">Unexpected server response. Try again.</string>
+    <string name="attendance_no_data">No data present</string>
+    <string name="dashboard_punch_hint">Tap to punch with face recognition</string>
+
+    <!-- Client visit -->
+    <string name="client_visit_subtitle">Recording visit as</string>
+    <string name="client_visit_form_title">Client details</string>
+    <string name="client_visit_fill_all_fields">Please fill all fields before saving.</string>
+    <string name="client_visit_location_required_banner">GPS location is required to save a visit. Turn on location and wait until coordinates appear below.</string>
+    <string name="client_visit_location_not_found">Location not found. Please enable GPS and try again.</string>
+    <string name="client_visit_visitor_meta">Card: %1$s · ID: %2$d</string>
+    <string name="client_visit_location_ok">Location: %1$s, %2$s</string>
+    <string name="client_visit_location_pending">Fetching GPS location…</string>
+    <string name="client_visit_location_unavailable">Location unavailable. Enable GPS and try again.</string>
+    <string name="hint_client_company_name">Client company name</string>
+    <string name="hint_client_company_address">Company address</string>
+    <string name="hint_contact_person_name">Contact person name</string>
+    <string name="hint_contact_person_no">Contact person number</string>
+    <string name="hint_client_email">Email</string>
+    <string name="hint_remarks">Remarks</string>
+    <string name="client_visit_visitor_photo_label">Visitor photo</string>
+    <string name="client_visit_add_photo">Add photo</string>
+    <string name="client_visit_change_photo">Change photo</string>
+    <string name="client_visit_photo_source_title">Visitor photo</string>
+    <string name="client_visit_photo_camera">Take photo</string>
+    <string name="client_visit_photo_gallery">Choose from gallery</string>
+    <string name="client_visit_photo_required">Please add a visitor photo before saving.</string>
+    <string name="client_visit_photo_error">Could not load the selected image. Try again.</string>
+    <string name="client_visit_camera_permission">Camera permission is required to take a photo.</string>
+    <string name="action_save_visit">Save visit</string>
+    <string name="client_visit_error_no_employee">Employee not found. Please log in again.</string>
+    <string name="client_visit_error_http">Could not save visit (HTTP %1$d).</string>
+    <string name="client_visit_error_generic">Could not save visit. Try again.</string>
+    <string name="client_visit_saved_default">Visit saved successfully</string>
+
+    <!-- My visit -->
+    <string name="my_visit_recent_title">My visits</string>
+    <string name="my_visit_recent_hint">Visits load for the selected month, year and day below</string>
+    <string name="my_visit_filter_title">Filter by date</string>
+    <string name="my_visit_filter_hint">Select month, year and day to load a specific visit</string>
+    <string name="my_visit_filter_day">Day</string>
+    <string name="my_visit_section_recent">Most recent visit</string>
+    <string name="my_visit_section_filtered">Visit on %1$s</string>
+    <string name="my_visit_no_data">No visit found for this date</string>
+    <string name="my_visit_list_title">Visits on %1$s</string>
+    <string name="my_visit_count">%1$d visit(s)</string>
+    <string name="my_visit_error_http">Could not load visits (HTTP %1$d).</string>
+    <string name="my_visit_error_generic">Could not load visits.</string>
+    <string name="my_visit_parse_error">Visit data received but could not be read. Log out and log in again, or contact support.</string>
+    <string name="my_visit_label_company">Company</string>
+    <string name="my_visit_label_visitor">Visitor</string>
+    <string name="my_visit_label_address">Address</string>
+    <string name="my_visit_label_contact">Contact person</string>
+    <string name="my_visit_label_phone">Phone</string>
+    <string name="my_visit_label_email">Email</string>
+    <string name="my_visit_label_remarks">Remarks</string>
+    <string name="my_visit_label_entry_date">Entry date</string>
 </resources>

@@ -3,6 +3,8 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.camera.any"
@@ -15,6 +17,7 @@
         android:label="@string/app_name"
         android:usesCleartextTraffic="true">
 
+        <!-- ✅ Only ONE launcher activity -->
         <activity
             android:name=".SplashActivity"
             android:exported="true">
@@ -24,18 +27,54 @@
             </intent-filter>
         </activity>
 
+        <!-- ✅ No intent-filter here -->
         <activity
             android:name=".LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Login"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".MainActivity"
             android:exported="false" />
 
-        <!-- ✅ ADD THIS -->
+        <activity
+            android:name=".SelectCompanyActivity"
+            android:exported="false" />
+
         <activity
             android:name=".PunchActivity"
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".AttendanceDetailsActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ClientVisitActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MyVisitActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.home.HomeActivity"
+            android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Universal reusable app header.
+  Include in any screen: <include layout="@layout/include_app_header" android:id="@+id/appHeader" />
+  Control title via AppHeaderController.
+-->
+<com.google.android.material.appbar.AppBarLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/appHeaderBar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    app:elevation="2dp">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/appHeaderToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:paddingStart="4dp"
+        android:paddingEnd="12dp"
+        app:titleTextColor="@color/app_text_primary"
+        app:subtitleTextColor="@color/app_text_secondary"
+        app:navigationIconTint="@color/login_accent"
+        app:titleTextAppearance="@style/TextAppearance.App.HeaderTitle" />
+
+</com.google.android.material.appbar.AppBarLayout>
