@@ -3,6 +3,7 @@ package com.example.facercognitionapp
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -151,6 +152,7 @@ class MainActivity : BaseDrawerContentActivity() {
         cameraHelper.lockForApi()
 
         lifecycleScope.launch {
+            var isSuccess = false
             try {
                 val location = LocationHelper.getCurrentLocation(this@MainActivity)
                 if (location == null) {
@@ -220,18 +222,20 @@ class MainActivity : BaseDrawerContentActivity() {
                     return@launch
                 }
 
-                showServerResponse(displayText, success = punchSuccess)
+                val isRedStyle = parsed?.successRaw == "1"
+                isSuccess = punchSuccess
+                showServerResponse(displayText, success = punchSuccess, isRedStyle = isRedStyle)
 
                 if (!punchSuccess) {
                     resetCameraStatus()
                     return@launch
                 }
 
-                if (callingActivity != null) {
-                    val punchTime = parsed?.resolvedPunchTime
-                        ?: java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-                            .format(java.util.Date())
-                    savePunchTime(punchType, punchTime)
+                val punchTime = parsed?.resolvedPunchTime
+                    ?: java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+                        .format(java.util.Date())
+                savePunchTime(punchType, punchTime)
+                runOnUiThread {
                     Handler(Looper.getMainLooper()).postDelayed({
                         setResult(
                             RESULT_OK,
@@ -241,14 +245,16 @@ class MainActivity : BaseDrawerContentActivity() {
                             }
                         )
                         finish()
-                    }, 2200)
+                    }, 2500)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Recognize request failed", e)
                 showStatus("Network error: ${e.localizedMessage}")
             } finally {
-                apiInFlight = false
-                cameraHelper.unlockAfterApi()
+                if (!isSuccess) {
+                    apiInFlight = false
+                    cameraHelper.unlockAfterApi()
+                }
             }
         }
     }
@@ -266,21 +272,42 @@ class MainActivity : BaseDrawerContentActivity() {
         showStatus("Align your face — ${if (inOutFlag == 1) "Punch IN" else "Punch OUT"}")
     }
 
-    /** Shows the backend `message` text only — no client-side success copy. */
-    private fun showServerResponse(message: String, success: Boolean) {
+    private fun showServerResponse(message: String, success: Boolean, isRedStyle: Boolean = false) {
         runOnUiThread {
             contentBinding.welcomeText.text = message
-            contentBinding.welcomeSubtext.visibility = if (success) View.VISIBLE else View.GONE
-            contentBinding.welcomeCard.visibility = View.VISIBLE
-            contentBinding.welcomeCard.setBackgroundColor(
-                if (success) 0xFFC8E6C9.toInt() else 0xFFFFF9C4.toInt()
-            )
-            tts.speak(message.lines().firstOrNull()?.take(120) ?: message, TextToSpeech.QUEUE_FLUSH, null, null)
+            if (isRedStyle) {
+                contentBinding.welcomeSubtext.visibility = View.GONE
+                contentBinding.btnOk.visibility = View.VISIBLE
+                contentBinding.welcomeCard.visibility = View.VISIBLE
+                contentBinding.welcomeCard.setBackgroundColor(0xFFFFCDD2.toInt())
+                contentBinding.welcomeIcon.text = "✕"
+                contentBinding.welcomeIconBg.backgroundTintList = ColorStateList.valueOf(0xFFEF5350.toInt())
+                tts.speak(message.lines().firstOrNull()?.take(120) ?: message, TextToSpeech.QUEUE_FLUSH, null, null)
 
-            if (!success) {
+                contentBinding.btnOk.setOnClickListener {
+                    setResult(RESULT_OK)
+                    finish()
+                }
+            } else if (!success) {
+                contentBinding.welcomeSubtext.visibility = View.GONE
+                contentBinding.btnOk.visibility = View.GONE
+                contentBinding.welcomeCard.visibility = View.VISIBLE
+                contentBinding.welcomeCard.setBackgroundColor(0xFFFFCDD2.toInt())
+                contentBinding.welcomeIcon.text = "✕"
+                contentBinding.welcomeIconBg.backgroundTintList = ColorStateList.valueOf(0xFFEF5350.toInt())
+                tts.speak(message.lines().firstOrNull()?.take(120) ?: message, TextToSpeech.QUEUE_FLUSH, null, null)
+
                 Handler(Looper.getMainLooper()).postDelayed({
                     contentBinding.welcomeCard.visibility = View.GONE
                 }, 3500)
+            } else {
+                contentBinding.welcomeSubtext.visibility = View.VISIBLE
+                contentBinding.btnOk.visibility = View.GONE
+                contentBinding.welcomeCard.visibility = View.VISIBLE
+                contentBinding.welcomeCard.setBackgroundColor(0xFFC8E6C9.toInt())
+                contentBinding.welcomeIcon.text = "✓"
+                contentBinding.welcomeIconBg.backgroundTintList = ColorStateList.valueOf(0xFF22C55E.toInt())
+                tts.speak(message.lines().firstOrNull()?.take(120) ?: message, TextToSpeech.QUEUE_FLUSH, null, null)
             }
         }
     }

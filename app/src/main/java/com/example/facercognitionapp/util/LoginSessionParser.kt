@@ -39,9 +39,21 @@ object LoginSessionParser {
                 else -> return ParsedLoginSession()
             }
 
-            parseFromObject(obj) ?: ParsedLoginSession(
-                message = readString(obj, "message", "Message", "msg", "Msg")
-            )
+            val targetObj = if (obj.has("data") && obj.get("data").isJsonObject) {
+                obj.getAsJsonObject("data")
+            } else {
+                obj
+            }
+
+            val parsed = parseFromObject(targetObj)
+            if (parsed != null && parsed.isValid()) {
+                val rootMsg = readString(obj, "message", "Message", "msg", "Msg")
+                parsed.copy(message = parsed.message ?: rootMsg)
+            } else {
+                ParsedLoginSession(
+                    message = readString(obj, "message", "Message", "msg", "Msg")
+                )
+            }
         } catch (e: Exception) {
             VisitDebugLog.e(VisitDebugLog.TAG_SESSION, "LoginSessionParser error: ${e.message}", e)
             ParsedLoginSession()

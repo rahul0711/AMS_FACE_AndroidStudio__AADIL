@@ -106,43 +106,88 @@
 
     </LinearLayout>
 
+    <!-- Success / failure response card (shown after API call) -->
     <LinearLayout
         android:id="@+id/welcomeCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="#F9FAFB"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingStart="32dp"
-        android:paddingTop="24dp"
+        android:paddingTop="28dp"
         android:paddingEnd="32dp"
         android:paddingBottom="32dp"
         android:visibility="gone">
 
+        <!-- Accent bar -->
         <View
+            android:id="@+id/welcomeAccentBar"
             android:layout_width="48dp"
             android:layout_height="4dp"
             android:layout_marginBottom="20dp"
             android:background="#F7931E" />
 
+        <!-- Icon circle -->
+        <FrameLayout
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="16dp">
+
+            <View
+                android:id="@+id/welcomeIconBg"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@drawable/circle_success_bg" />
+
+            <TextView
+                android:id="@+id/welcomeIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="✓"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+        </FrameLayout>
+
+        <!-- Main message from server -->
         <TextView
             android:id="@+id/welcomeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="Welcome Back!"
             android:textColor="#1F2937"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
+        <!-- Sub-message shown on success -->
         <TextView
             android:id="@+id/welcomeSubtext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Identity verified successfully"
+            android:gravity="center"
             android:textColor="#6B7280"
             android:textSize="14sp"
+            android:visibility="gone" />
+
+        <!-- OK button — shown only on success -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnOk"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/btn_ok_bg"
+            android:letterSpacing="0.05"
+            android:text="OK"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
             android:visibility="gone" />
 
     </LinearLayout>

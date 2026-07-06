@@ -18,6 +18,8 @@ data class RecognizeResponse(
     @SerializedName("message") val message: String? = null,
     @SerializedName("msg") val msg: String? = null,
     @SerializedName("status") val status: String? = null,
+    @SerializedName("success") val success: Boolean? = null,
+    val successRaw: String? = null,
     @SerializedName("punch_time") val punchTime: String? = null,
     @SerializedName("punchTime") val punchTimeAlt: String? = null,
     @SerializedName("employeeName") val employeeName: String? = null,
@@ -50,6 +52,9 @@ data class RecognizeResponse(
      * Only treat as punch success when the server message confirms it — never on unknown bodies.
      */
     fun isPunchSuccess(): Boolean {
+        if (successRaw == "1") return false
+        if (success == true) return true
+        if (status == "1" || status == "true") return true
         if (isPunchFailure()) return false
         val msg = displayMessage?.lowercase() ?: return false
         return msg.contains("successfully") || msg.contains("punch done")
@@ -61,6 +66,12 @@ data class RecognizeResponse(
             if (json.isNullOrBlank()) return null
             return try {
                 val o = JsonParser.parseString(json).asJsonObject
+                val successElement = o.get("success") ?: o.get("Success")
+                val rawStr = when {
+                    successElement == null || successElement.isJsonNull -> null
+                    successElement.isJsonPrimitive -> successElement.asJsonPrimitive.asString
+                    else -> null
+                }
                 RecognizeResponse(
                     match = readBoolean(o, "match") ?: readBoolean(o, "Match"),
                     score = readDouble(o, "score"),
@@ -68,6 +79,8 @@ data class RecognizeResponse(
                     message = readString(o, "message"),
                     msg = readString(o, "msg"),
                     status = readString(o, "status"),
+                    success = readBoolean(o, "success") ?: readBoolean(o, "Success"),
+                    successRaw = rawStr,
                     punchTime = readString(o, "punch_time"),
                     punchTimeAlt = readString(o, "punchTime"),
                     employeeName = readString(o, "employeeName"),

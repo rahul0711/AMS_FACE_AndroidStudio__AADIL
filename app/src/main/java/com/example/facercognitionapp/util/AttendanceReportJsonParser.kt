@@ -22,12 +22,12 @@ object AttendanceReportJsonParser {
     fun parseInOutReport(raw: String?): List<EmployeeWiseInOutReportDto> {
         if (raw.isNullOrBlank()) return emptyList()
         return try {
-            val root = unwrapToJsonElement(raw.trim(), maxDepth = 4)
+            val root = unwrapToJsonElement(raw.trim(), maxDepth = 4) ?: return emptyList()
+            val dataRoot = extractData(root)
             when {
-                root == null -> emptyList()
-                root.isJsonArray -> gson.fromJson(root, reportListType) ?: emptyList()
-                root.isJsonObject -> listOf(
-                    gson.fromJson(root, EmployeeWiseInOutReportDto::class.java)
+                dataRoot.isJsonArray -> gson.fromJson(dataRoot, reportListType) ?: emptyList()
+                dataRoot.isJsonObject -> listOf(
+                    gson.fromJson(dataRoot, EmployeeWiseInOutReportDto::class.java)
                 )
                 else -> emptyList()
             }
@@ -39,18 +39,37 @@ object AttendanceReportJsonParser {
     fun parseCurrentDatePunch(raw: String?): List<CurrentDatePunchDto> {
         if (raw.isNullOrBlank()) return emptyList()
         return try {
-            val root = unwrapToJsonElement(raw.trim(), maxDepth = 4)
+            val root = unwrapToJsonElement(raw.trim(), maxDepth = 4) ?: return emptyList()
+            val dataRoot = extractData(root)
             when {
-                root == null -> emptyList()
-                root.isJsonArray -> gson.fromJson(root, punchListType) ?: emptyList()
-                root.isJsonObject -> listOf(
-                    gson.fromJson(root, CurrentDatePunchDto::class.java)
+                dataRoot.isJsonArray -> gson.fromJson(dataRoot, punchListType) ?: emptyList()
+                dataRoot.isJsonObject -> listOf(
+                    gson.fromJson(dataRoot, CurrentDatePunchDto::class.java)
                 )
                 else -> emptyList()
             }
         } catch (_: Exception) {
             emptyList()
         }
+    }
+
+    private fun extractData(root: JsonElement): JsonElement {
+        if (!root.isJsonObject) return root
+        val obj = root.asJsonObject
+        val knownKeys = listOf("data", "Data", "Table", "table", "result", "Result")
+        for (key in knownKeys) {
+            if (obj.has(key)) {
+                val el = obj.get(key)
+                if (el != null && !el.isJsonNull) {
+                    if (el.isJsonPrimitive && el.asJsonPrimitive.isString) {
+                        val unwrapped = unwrapToJsonElement(el.asString.trim(), maxDepth = 2)
+                        if (unwrapped != null) return unwrapped
+                    }
+                    return el
+                }
+            }
+        }
+        return root
     }
 
     /**

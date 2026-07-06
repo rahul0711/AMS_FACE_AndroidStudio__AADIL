@@ -1,6 +1,7 @@
 package com.example.facercognitionapp.camera
 
 import android.content.Context
+import android.util.Log
 import android.util.Size
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider

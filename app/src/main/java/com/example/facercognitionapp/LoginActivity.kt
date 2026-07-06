@@ -15,6 +15,7 @@ import com.example.facercognitionapp.util.VisitDebugLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.google.gson.JsonParser
 
 class LoginActivity : AppCompatActivity() {
 
@@ -63,9 +64,11 @@ class LoginActivity : AppCompatActivity() {
                 )
 
                 if (!response.isSuccessful) {
+                    val serverMsg = getBackendMessage(errorBody) ?: getBackendMessage(rawBody)
+                    val hint = serverMsg ?: "Login failed (HTTP ${response.code()})"
                     Toast.makeText(
                         this@LoginActivity,
-                        "Login failed (HTTP ${response.code()})",
+                        hint,
                         Toast.LENGTH_LONG
                     ).show()
                     return@launch
@@ -74,8 +77,8 @@ class LoginActivity : AppCompatActivity() {
                 val session = LoginSessionParser.parse(rawBody)
 
                 if (!session.isValid()) {
-                    val hint = session.message?.takeIf { it.isNotBlank() }
-                        ?: "Server returned empty profile. Check mobile/password."
+                    val serverMsg = session.message?.takeIf { it.isNotBlank() } ?: getBackendMessage(rawBody)
+                    val hint = serverMsg ?: "Server returned empty profile. Check mobile/password."
                     VisitDebugLog.e(
                         VisitDebugLog.TAG_SESSION,
                         "Login rejected: no employeeId/visitorId in response"
@@ -120,5 +123,22 @@ class LoginActivity : AppCompatActivity() {
         binding.loginBtn.text = getString(
             if (loading) R.string.login_please_wait else R.string.login_sign_in
         )
+    }
+
+    private fun getBackendMessage(json: String?): String? {
+        if (json.isNullOrBlank()) return null
+        return try {
+            val root = JsonParser.parseString(json.trim())
+            if (root.isJsonObject) {
+                val obj = root.asJsonObject
+                val msg = obj.get("message")?.takeIf { !it.isJsonNull }?.asString
+                    ?: obj.get("msg")?.takeIf { !it.isJsonNull }?.asString
+                if (!msg.isNullOrBlank()) msg else null
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
+        }
     }
 }
