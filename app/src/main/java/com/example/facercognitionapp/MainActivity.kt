@@ -91,6 +91,19 @@ class MainActivity : BaseDrawerContentActivity() {
             },
             onNoFace = {
                 showStatus("No face detected")
+            },
+            onLowLightChanged = { isDark ->
+                if (isDark) {
+                    contentBinding.screenFlashOverlay.visibility = View.VISIBLE
+                    val lp = window.attributes
+                    lp.screenBrightness = android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                    window.attributes = lp
+                } else {
+                    contentBinding.screenFlashOverlay.visibility = View.GONE
+                    val lp = window.attributes
+                    lp.screenBrightness = android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                    window.attributes = lp
+                }
             }
         )
 
@@ -141,6 +154,7 @@ class MainActivity : BaseDrawerContentActivity() {
         val companyId = prefs.getInt("company_id", 0)
         val employeeId = prefs.getInt("employee_id", 0)
         val employeeCardNo = prefs.getString("employee_card_no", "") ?: ""
+        val isLocationBypass = prefs.getInt("is_location_bypass", 0)
 
         if (companyId == 0 || employeeId == 0 || employeeCardNo.isBlank()) {
             showStatus("Login data missing. Please login again.")
@@ -191,7 +205,8 @@ class MainActivity : BaseDrawerContentActivity() {
                     longitude = longitude.toRequestBody(textType),
                     companyId = companyId.toString().toRequestBody(textType),
                     employeeId = employeeId.toString().toRequestBody(textType),
-                    employeeCardNo = employeeCardNo.toRequestBody(textType)
+                    employeeCardNo = employeeCardNo.toRequestBody(textType),
+                    isLocationBypass = isLocationBypass.toString().toRequestBody(textType)
                 )
 
                 val rawJson = response.body()?.string()
@@ -255,7 +270,17 @@ class MainActivity : BaseDrawerContentActivity() {
                     apiInFlight = false
                     cameraHelper.unlockAfterApi()
                 }
+                disableScreenFlash()
             }
+        }
+    }
+
+    private fun disableScreenFlash() {
+        runOnUiThread {
+            contentBinding.screenFlashOverlay.visibility = View.GONE
+            val lp = window.attributes
+            lp.screenBrightness = android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            window.attributes = lp
         }
     }
 
@@ -325,6 +350,13 @@ class MainActivity : BaseDrawerContentActivity() {
         }
         if (::cameraHelper.isInitialized) {
             cameraHelper.stopCamera()
+        }
+        try {
+            val lp = window.attributes
+            lp.screenBrightness = android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            window.attributes = lp
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to restore brightness in onDestroy", e)
         }
     }
 

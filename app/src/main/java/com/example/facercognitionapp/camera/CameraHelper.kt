@@ -23,7 +23,8 @@ class CameraHelper(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
     private val onFaceDetected: (File) -> Unit,
-    private val onNoFace: () -> Unit
+    private val onNoFace: () -> Unit,
+    private val onLowLightChanged: (Boolean) -> Unit = {}
 ) {
 
     private val executor = Executors.newSingleThreadExecutor()
@@ -41,6 +42,8 @@ class CameraHelper(
 
     private var lastAnalysisTime = 0L
     private val analysisIntervalMs = 120L
+
+    private var isLowLightActive = false
 
     // ✅ Optimized ML Kit detector
     private val detector = FaceDetection.getClient(
@@ -108,6 +111,39 @@ class CameraHelper(
             return
         }
         lastAnalysisTime = now
+
+        // Calculate average luminance (brightness) of the frame
+        try {
+            val yPlane = imageProxy.planes[0]
+            val buffer = yPlane.buffer
+            val start = buffer.position()
+            val remaining = buffer.remaining()
+            
+            var sum = 0L
+            var count = 0
+            val step = maxOf(50, remaining / 1000)
+            
+            for (i in 0 until remaining step step) {
+                sum += buffer.get(start + i).toInt() and 0xFF
+                count++
+            }
+            
+            val avgLuminance = if (count > 0) sum.toDouble() / count else 0.0
+            val isDark = if (isLowLightActive) {
+                avgLuminance < 60.0
+            } else {
+                avgLuminance < 45.0
+            }
+            
+            if (!apiLocked && !isCapturing && isDark != isLowLightActive) {
+                isLowLightActive = isDark
+                ContextCompat.getMainExecutor(context).execute {
+                    onLowLightChanged(isLowLightActive)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("CameraHelper", "Luminance calculation failed", e)
+        }
 
         val mediaImage = imageProxy.image ?: run {
             imageProxy.close()
@@ -196,6 +232,7 @@ class CameraHelper(
     fun unlockAfterApi() {
         apiLocked = false
         isCapturing = false
+        isLowLightActive = false
     }
 
     @Deprecated("Use unlockAfterApi()", ReplaceWith("unlockAfterApi()"))

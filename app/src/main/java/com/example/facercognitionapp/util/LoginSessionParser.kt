@@ -20,7 +20,8 @@ object LoginSessionParser {
         val departmentName: String? = null,
         val designationName: String? = null,
         val userType: String? = null,
-        val message: String? = null
+        val message: String? = null,
+        val isLocationBypass: Int = 0
     ) {
         fun resolvedId(): Int =
             sequenceOf(employeeId, visitorId, userId).firstOrNull { it > 0 } ?: 0
@@ -93,7 +94,8 @@ object LoginSessionParser {
             departmentName = readString(obj, "departmentName", "DepartmentName"),
             designationName = readString(obj, "designationName", "DesignationName"),
             userType = readString(obj, "userType", "UserType"),
-            message = readString(obj, "message", "Message", "msg", "Msg")
+            message = readString(obj, "message", "Message", "msg", "Msg"),
+            isLocationBypass = readInt(obj, "isLocationBypass", "IsLocationBypass")
         )
     }
 
