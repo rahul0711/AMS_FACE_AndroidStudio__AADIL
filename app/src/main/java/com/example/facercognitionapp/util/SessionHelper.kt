@@ -37,6 +37,7 @@ object SessionHelper {
         editor.putString("department_name", session.departmentName)
         editor.putString("designation_name", session.designationName)
         editor.putString("user_type", session.userType)
+        editor.putInt("is_location_bypass", session.isLocationBypass)
     }
 
     /** Store login password for APIs that require Password field (e.g. change password). */

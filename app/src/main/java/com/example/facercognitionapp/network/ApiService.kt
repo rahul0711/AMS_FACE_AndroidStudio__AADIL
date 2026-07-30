@@ -34,7 +34,8 @@ interface ApiService {
         @Part("Longitude") longitude: RequestBody,
         @Part("CompanyId") companyId: RequestBody,
         @Part("EmployeeId") employeeId: RequestBody,
-        @Part("EmployeeCardNo") employeeCardNo: RequestBody
+        @Part("EmployeeCardNo") employeeCardNo: RequestBody,
+        @Part("isLocationBypass") isLocationBypass: RequestBody
     ): Response<ResponseBody>
 
     @Headers("Content-Type: application/json", "Accept: application/json")

@@ -14,6 +14,7 @@ import com.example.facercognitionapp.ui.core.BaseDrawerContentActivity
 import com.example.facercognitionapp.ui.myvisit.MyVisitCardBinder
 import com.example.facercognitionapp.util.SessionHelper
 import com.example.facercognitionapp.util.VisitorDetailsJsonParser
+import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -173,9 +174,59 @@ class MyVisitActivity : BaseDrawerContentActivity() {
                     )
                 }
 
-                val visits = VisitorDetailsJsonParser.sortByEntryDateDescending(
-                    VisitorDetailsJsonParser.parseList(result.body)
-                )
+                var isSuccess = true
+                var backendMessage: String? = null
+                try {
+                    val rawJson = result.body.trim()
+                    if (rawJson.startsWith("{")) {
+                        val root = JsonParser.parseString(rawJson)
+                        if (root.isJsonObject) {
+                            val obj = root.asJsonObject
+                            val successEl = obj.get("success") ?: obj.get("Success")
+                            val statusEl = obj.get("status") ?: obj.get("Status")
+                            val hasSuccess = successEl != null && !successEl.isJsonNull
+                            val hasStatus = statusEl != null && !statusEl.isJsonNull
+
+                            isSuccess = when {
+                                hasSuccess -> when {
+                                    successEl.isJsonPrimitive && successEl.asJsonPrimitive.isBoolean -> successEl.asBoolean
+                                    successEl.isJsonPrimitive && successEl.asJsonPrimitive.isString -> {
+                                        val s = successEl.asString.lowercase()
+                                        s == "true" || s == "1" || s == "yes"
+                                    }
+                                    successEl.isJsonPrimitive && successEl.asJsonPrimitive.isNumber -> successEl.asInt != 0
+                                    else -> true
+                                }
+                                hasStatus -> when {
+                                    statusEl.isJsonPrimitive && statusEl.asJsonPrimitive.isBoolean -> statusEl.asBoolean
+                                    statusEl.isJsonPrimitive && statusEl.asJsonPrimitive.isString -> {
+                                        val s = statusEl.asString.lowercase()
+                                        s == "true" || s == "1" || s == "yes"
+                                    }
+                                    statusEl.isJsonPrimitive && statusEl.asJsonPrimitive.isNumber -> statusEl.asInt != 0
+                                    else -> true
+                                }
+                                else -> true
+                            }
+                            if (!isSuccess) {
+                                backendMessage = obj.get("message")?.takeIf { !it.isJsonNull }?.asString
+                                    ?: obj.get("Message")?.takeIf { !it.isJsonNull }?.asString
+                                    ?: obj.get("msg")?.takeIf { !it.isJsonNull }?.asString
+                                    ?: obj.get("Msg")?.takeIf { !it.isJsonNull }?.asString
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Ignore parse errors or handle it as success = true
+                }
+
+                val visits = if (isSuccess) {
+                    VisitorDetailsJsonParser.sortByEntryDateDescending(
+                        VisitorDetailsJsonParser.parseList(result.body)
+                    )
+                } else {
+                    emptyList()
+                }
 
                 val monthName = resources.getStringArray(R.array.attendance_month_names)
                     .getOrNull(month - 1) ?: month.toString()
@@ -183,6 +234,12 @@ class MyVisitActivity : BaseDrawerContentActivity() {
 
                 withContext(Dispatchers.Main) {
                     binding.progressRecent.visibility = View.GONE
+
+                    if (!isSuccess) {
+                        showError(backendMessage ?: getString(R.string.my_visit_error_generic))
+                        binding.layoutVisitList.removeAllViews()
+                        return@withContext
+                    }
 
                     if (!result.ok) {
                         showError(getString(R.string.my_visit_error_http, result.httpCode))
